@@ -1,0 +1,246 @@
+import PySimpleGUI as sg
+
+first=True
+##----CALCULATOR FUNCTIONS-------------------------------##
+var: dict = {'front': [], 'back': [], 'decimal': False, 'Prob': 0.0}
+isi : dict = {'PeA': 0.0, 'PeB': 0.0, 'eN': 0.0, 'eX': 0.0, 'eSeL': 0.0}
+curr: list = ["P(A)", "P(B)", "N", "X", "SL"]
+step: int = 0
+tdef: dict = {'size': (50, 1), 'justification': ('left'), 'background_color': "#272533", 'text_color': 'white',
+              'font':('Franklin Gothic Book', 14, 'bold')}
+bd: dict = {'size': (15, 1), 'font': ('Franklin Gothic Book', 24), 'button_color': ("black", "#FFFFFF"), 'focus': True}
+bw: dict = {'size': (7, 2), 'font': ('Franklin Gothic Book', 24), 'button_color': ("black", "#F8F8F8")}
+bt: dict = {'size': (7, 2), 'font': ('Franklin Gothic Book', 24), 'button_color': ("black", "#F1EABC")}
+bo: dict = {'size': (15, 2), 'font': ('Franklin Gothic Book', 24), 'button_color': ("black", "#ECA527"), 'focus': True}
+
+def mwindowhome():
+    layouthome : list = [
+        [sg.Text('HypoTestPy', size=(50, 1), justification='center', background_color="#272533",
+                 text_color='white', font=('Franklin Gothic Book', 14, 'bold'))],
+        [sg.Button('Start', **bw)],
+        [sg.Button('Tutorial', **bw)],
+        [sg.Button('Quit', **bw)],
+    ]
+    return sg.Window('HypoTestPy', layout=layouthome, background_color="#272533", size=(580, 660),
+                    return_keyboard_events=True)
+def mwindowtut():
+    layouttut: list = [
+        [sg.Text('--DICTIONARY--', **tdef)],
+        [sg.Text('* H0 is the first statement', **tdef)],
+        [sg.Text('* H1 is the second statement', **tdef)],
+        [sg.Text('* P is probability stated in H0. input P in a form of A/B', **tdef)],
+        [sg.Text('* N is tested sample', **tdef)],
+        [sg.Text('* x is sample that meets the requirement', **tdef)],
+        [sg.Text('* SL is significant level', **tdef)],
+        [sg.Button('Home', **bw), sg.Button('Example', **bo)]
+    ]
+    return sg.Window('HypoTestPy', layout=layouttut, background_color="#272533", size=(580, 660),
+                     return_keyboard_events=True)
+def mwindowex():
+    layoutex: list = [
+        [sg.Text('On average 70% of people pass their driving test first time.\n'
+                 'There are complaints that Mr McTaggart is too harsh and so, \n'
+                 'unknown to himself, his work is monitored. It is found that he\n'
+                 'fails four out of ten candidates. Are the complaints justified\n'
+                 ' at the 5% significant level?', size=(50, 7), justification='center', background_color="#272533",
+                 text_color='white', font=('Franklin Gothic Book', 14, 'bold'))],
+        [sg.Text('* H0 = "70% of people pass their driving test first time"', **tdef)],
+        [sg.Text('* H1 = "Mr McTaggart to harsh, so it is under 70%"', **tdef)],
+        [sg.Text('* P : A = 7', **tdef)],
+        [sg.Text('      B = 10', **tdef)],
+        [sg.Text('* N = 10', **tdef)],
+        [sg.Text('* x = 6', **tdef)],
+        [sg.Text('* SL = 5', **tdef)],
+        [sg.Button('Home', **bw)]
+    ]
+    return sg.Window('HypoTestPy', layout=layoutex, background_color="#272533", size=(580, 660),
+                     return_keyboard_events=True)
+def mwindowst():
+    layoutst: list = [
+        [sg.Text(curr[step], size=(50, 1), justification='center', background_color="#272533",
+                 text_color='white', font=('Franklin Gothic Book', 14, 'bold'))],
+        [sg.Text('0.0000', size=(18, 1), justification='right', background_color='black', text_color='red',
+                 font=('Digital-7', 48), relief='sunken', key="_DISPLAY_")],
+        [sg.Button('7', **bw), sg.Button('8', **bw), sg.Button('9', **bw), sg.Button("C", **bt)],
+        [sg.Button('4', **bw), sg.Button('5', **bw), sg.Button('6', **bw), sg.Button(".", **bt)],
+        [sg.Button('1', **bw), sg.Button('2', **bw), sg.Button('3', **bw), sg.Button("0", **bt)],
+        [sg.Button('Prev', **bo, bind_return_key=True), sg.Button('Next', **bo, bind_return_key=True)]
+    ]
+    return sg.Window('HypoTestPy', layout=layoutst, background_color="#272533", size=(580, 660),
+                     return_keyboard_events=True)
+def mwindowres():
+    layoutres: list = [
+        [sg.Text(summ, size=(50, 1), justification='center', background_color="#272533",
+                 text_color='white', font=('Franklin Gothic Book', 14, 'bold'))]
+        [sg.Text(str(isi['eSeL']), size=(50, 1), justification='center', background_color="#272533",
+                 text_color='white', font=('Franklin Gothic Book', 14, 'bold'))]
+        [sg.Button('Home', **bw)]
+    ]
+    return sg.Window('HypoTestPy', layout=layoutres, background_color="#272533", size=(580, 660),
+                     return_keyboard_events=True)
+
+# -----MAIN CALCULATION
+def combine(p, r):
+    h = 1
+    m = p-r
+    for j in range(m):
+        h = h * (p - j) / (j + 1)
+    return h
+
+def Count(pr, I, up, po):
+    hasil = 1
+    qr = 1 - pr
+    if I == 0:
+        for i in range(po):
+            hasil = hasil * qr
+        print(I, " ", hasil)
+        return hasil
+    if I == po:
+        for i in range(po):
+            hasil = hasil * pr
+        print(I, " ", hasil)
+        return hasil
+    hasil = combine(po, I)
+    for i in range(I):
+        hasil = hasil * pr
+    temp=po-I
+    for i in range(temp):
+        hasil = hasil * qr
+    if up:
+        print(I, " ", hasil)
+        return hasil + Count(pr, I+1, up, po)
+    print(I, " ", hasil)
+    return hasil + Count(pr, I-1, up, po)
+
+def OneTail(p, pop, x, hi):
+    print("X   Probability")
+    global summ
+    summ = Count(p, x, hi, pop)
+    print("sum", summ)
+    summ=int(summ*100000)
+    summ=float(summ/1000)
+'''    if summ<s:
+        print(summ, "% <", s, "%. Therefore, reject h0 and accept h1")
+    else:
+        print(summ, "% >", s, "%. Therefore, accept h0 and reject h1")
+'''
+# -----HELPER FUNCTIONS
+def format_number() -> float:
+    ''' Create a consolidated string of numbers from front and back lists '''
+    global isi
+    temp = float(''.join(var['front']) + '.' + ''.join(var['back']))
+    isi[step] = temp
+    return temp
+
+def update_display(display_value: float):
+    ''' Update the calculator display after an event click '''
+    try:
+        windowstart['_DISPLAY_'].update(value='{:,.4f}'.format(display_value))
+    except:
+        windowstart['_DISPLAY_'].update(value=display_value)
+
+# -----CLICK EVENTS
+def number_click(event: str):
+    ''' Number button button click event '''
+    global var
+    if var['decimal']:
+        var['back'].append(event)
+    else:
+        var['front'].append(event)
+    update_display(format_number())
+
+def clear_click():
+    ''' CE or C button click event '''
+    global var
+    var['front'].clear()
+    var['back'].clear()
+    var['decimal'] = False
+
+# -----MAIN EVENT LOOP------------------------------------##
+def tutorial():
+    windowtut=mwindowtut()
+    while True:
+        event, values = windowtut.read()
+        print(event)
+        if event == 'Home' or event == None:
+            windowtut.close()
+            return
+        else:
+            windowtut.close()
+            example()
+
+def example():
+    windowex=mwindowex()
+    while True:
+        event, values = windowex.read()
+        print(event)
+        if event == 'Home' or event == None:
+            windowex.close()
+            return
+
+def start():
+    global var
+    global isi
+    global step
+    global windowstart
+    windowstart = mwindowst()
+    event, values = windowstart.read()
+    if event == '.':
+        var['decimal'] = True
+    if event in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        number_click(event)
+    if event in ['C']:  # 'Escape:27 for keyboard control
+        clear_click()
+        update_display(0.0)
+        var['result'] = 0.0
+    if event == 'Next':
+        clear_click()
+        update_display(0.0)
+        var['result'] = 0.0
+        if step == 4:
+            naik = False
+            step = 0
+            clear_click()
+            update_display(0.0)
+            var['result'] = 0.0
+            var['Prob'] = float(isi['PeA'] / isi['PeB'])
+            if float(isi['eX'] / isi['eN']) > var['prob']:
+                naik = True
+            OneTail(isi['Prob'], isi['eN'], isi['eX'], naik)
+            windowstart.close()
+            result()
+        elif step < 4:
+            windowstart.close()
+            step += 1
+            start()
+    if event == 'Prev':
+        clear_click()
+        update_display(0.0)
+        var['result'] = 0.0
+        if step == 0:
+            windowstart.close()
+            return
+        windowstart.close()
+        step -= 1
+        start()
+
+def result():
+    windowres = mwindowres()
+    event, values = windowres.read()
+    if event == 'Home' or event == None:
+        windowres.close()
+        return
+
+##--MAIN LOOP--##
+while True:
+    windowhome = mwindowhome()
+    event, values = windowhome.read()
+    print(event)
+    if event == 'Quit' or event == None:
+        break
+    if event == 'Tutorial':
+        windowhome.close()
+        tutorial()
+    if event == 'Start':
+        windowhome.close()
+        start()
